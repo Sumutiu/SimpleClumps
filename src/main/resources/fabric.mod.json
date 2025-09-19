@@ -15,9 +15,6 @@
 			"com.sumutiu.simpleclumps.SimpleClumps"
 		]
 	},
-	"mixins": [
-		"simpleclumps.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=0.17.2",
 		"minecraft": "~1.21.8",

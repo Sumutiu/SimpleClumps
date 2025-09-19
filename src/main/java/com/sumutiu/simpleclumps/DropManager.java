@@ -129,8 +129,7 @@ public class DropManager {
         }
 
         for (Group g : groups) {
-            if (g.members.isEmpty() || (g.members.size() == 1 && g.totalCount == 1)) {
-                processedThisTick.addAll(g.members);
+            if (g.members.isEmpty()) {
                 continue;
             }
 

@@ -9,9 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
@@ -104,12 +101,17 @@ public class DropManager {
                 pos.x + radius, pos.y + radius, pos.z + radius);
 
         List<ItemEntity> list = world.getEntitiesByClass(ItemEntity.class, box, ItemEntity::isAlive);
+        if (list.isEmpty()) return;
 
         List<Group> groups = new ArrayList<>();
 
         for (ItemEntity ie : list) {
+            if (processedThisTick.contains(ie)) {
+                continue;
+            }
             ItemStack st = ie.getStack();
             if (st.isEmpty()) continue;
+
             boolean added = false;
             for (Group g : groups) {
                 if (ItemStack.areItemsAndComponentsEqual(g.prototype, st)) {
@@ -127,11 +129,15 @@ public class DropManager {
         }
 
         for (Group g : groups) {
+            if (g.members.isEmpty() || (g.members.size() == 1 && g.totalCount == 1)) {
+                processedThisTick.addAll(g.members);
+                continue;
+            }
+
             int total = g.totalCount;
             if (total <= 0) continue;
 
             processedThisTick.addAll(g.members);
-
             Vec3d spawnPos = g.members.getFirst().getPos();
 
             // remove old entities
@@ -151,6 +157,7 @@ public class DropManager {
                 ItemEntity created = new ItemEntity(world, spawnPos.x, spawnPos.y, spawnPos.z, newStack);
                 created.setToDefaultPickupDelay();
                 created.setVelocity(originalVelocity);
+                processedThisTick.add(created);
 
                 String itemName = newStack.getName().getString();
                 Text label = Text.literal("x" + size).formatted(Formatting.GREEN)

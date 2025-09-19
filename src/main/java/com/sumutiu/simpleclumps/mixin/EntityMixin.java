@@ -21,7 +21,7 @@ public abstract class EntityMixin implements MergedMob {
 
     private static final TrackedData<Integer> STACK_COUNT = DataTracker.registerData(Entity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    @Inject(method = "initDataTracker", at = @At("TAIL"))
+    @Inject(method = "initDataTracker", at = @At("HEAD"))
     private void initDataTracker(CallbackInfo ci) {
         this.dataTracker.set(STACK_COUNT, 1);
     }

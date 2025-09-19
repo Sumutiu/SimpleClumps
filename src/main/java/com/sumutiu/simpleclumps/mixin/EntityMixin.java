@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements MergedMob {
@@ -35,15 +36,4 @@ public abstract class EntityMixin implements MergedMob {
         this.dataTracker.set(STACK_COUNT, count);
     }
 
-    @Inject(method = "writeNbt", at = @At("HEAD"))
-    private void writeNbt(NbtCompound nbt, CallbackInfo ci) {
-        nbt.putInt("StackCount", simpleclumps_getStackCount());
-    }
-
-    @Inject(method = "readNbt", at = @At("HEAD"))
-    private void readNbt(NbtCompound nbt, CallbackInfo ci) {
-        if (nbt.contains("StackCount")) {
-            simpleclumps_setStackCount(nbt.getInt("StackCount").orElse(1));
-        }
-    }
 }

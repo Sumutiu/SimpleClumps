@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * DropManager: clumps XP and stackable items, and periodically clears stray drops.
  */
 public class DropManager {
-    private static int radius = 10;
+    private static int radius = 5;
     private static int cleanIntervalTicks = 5 * 60 * 20;
 
     private static final Queue<QueuedEntity> pending = new ConcurrentLinkedQueue<>();

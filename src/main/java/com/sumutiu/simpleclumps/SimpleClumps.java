@@ -8,7 +8,7 @@ import net.minecraft.entity.Entity;
 
 public class SimpleClumps implements ModInitializer {
 	// radius (blocks) for clumping in each axis
-	public static final int CLUMP_RADIUS = 10;
+	public static final int CLUMP_RADIUS = 5;
 
 	// cleanup interval: 5 minutes (ticks)
 	public static final int CLEAN_INTERVAL_TICKS = 5 * 60 * 20;

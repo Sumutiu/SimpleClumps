@@ -16,12 +16,14 @@ public class SimpleClumps implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		DropManager.init(CLUMP_RADIUS, CLEAN_INTERVAL_TICKS);
+		MobMergeManager.init();
 
 		// when entities are loaded into a ServerWorld: check item/xp drops
 		ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerWorld world) -> {
 			if (world == null) return;
 			if (!world.isClient()) {
 				DropManager.onEntityLoad(entity, world);
+				MobMergeManager.onEntityLoad(entity, world);
 			}
 		});
 

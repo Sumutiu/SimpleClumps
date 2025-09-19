@@ -1,41 +1,46 @@
-🟦 SimpleClumps – Lag-free drops, smoother servers!
+# 🟦 SimpleClumps – Lag-free drops, smoother servers!
 
-SimpleClumps is a lightweight, fully server-side Fabric mod that automatically merges XP orbs and item drops to keep your world running smoothly.
+**SimpleClumps** is a lightweight, fully server-side **Fabric** mod that automatically merges XP orbs and item drops to keep your world running smoothly.  
 
-By clumping entities together, it reduces lag while still keeping gameplay natural and intuitive.
+By clumping entities together, it reduces lag while still keeping gameplay natural and intuitive.  
 
 Perfect for survival servers, SMPs, and performance-focused hosts.
 
-✨ Features
+---
 
-🟦 XP orbs automatically merge into a single orb
+## ✨ Features
 
-📦 Dropped items in a 5×5×5 radius merge into full stacks
+- 🟦 XP orbs automatically merge into a single orb  
+- 📦 Dropped items in a **5×5×5 radius** merge into full stacks  
+- 🔢 Items display as `x30 Spruce Wood` (example) instead of 30 separate drops  
+- ⚡ Significantly reduces entity count for better server performance  
+- 🌍 100% server-side — no client mod required!  
 
-🔢 Items display as x30 Spruce Wood (example) instead of 30 separate drops
+---
 
-⚡ Significantly reduces entity count for better server performance
+## 🧩 Requirements
 
-🌍 100% server-side — no client mod required!
+- [Fabric Loader](https://fabricmc.net/use/)  
+- [Fabric API](https://modrinth.com/mod/fabric-api)  
 
-🧩 Requirements
+---
 
-Fabric Loader
+## 🌟 Why SimpleClumps?
 
-Fabric API
-
-🌟 Why SimpleClumps?
-
-Because your server deserves smooth performance!
-SimpleClumps helps cut down lag from excessive item and XP entities without changing how players interact with them.
+Because **your server deserves smooth performance!**  
+SimpleClumps helps cut down lag from excessive item and XP entities without changing how players interact with them.  
 
 Fewer entities. Cleaner worlds. Happier players.
 
-📜 License
+---
 
-This mod is licensed under the GNU AGPLv3 Licence.
+## 📜 License
 
-💬 Feedback
+This mod is licensed under the GNU AGPLv3 Licence.  
 
-Found a bug or have a feature suggestion?
+---
+
+## 💬 Feedback
+
+Found a bug or have a feature suggestion?  
 Open an issue or PR on GitHub!

@@ -182,13 +182,34 @@ public class DropManager {
 
         int totalXp = 0;
         Vec3d spawnPos = source.getPos();
+        Vec3d originalVelocity = source.getVelocity();
 
         for (ExperienceOrbEntity orb : list) {
             totalXp += orb.getValue(); // Mojang mapping
             orb.discard();
         }
 
-        ExperienceOrbEntity.spawn(world, spawnPos, totalXp);
+        while (totalXp > 0) {
+            int orbSize = roundToOrbSize(totalXp);
+            totalXp -= orbSize;
+            ExperienceOrbEntity newOrb = new ExperienceOrbEntity(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), orbSize);
+            newOrb.setVelocity(originalVelocity);
+            world.spawnEntity(newOrb);
+        }
+    }
+
+    // this is a replica of the private method in ExperienceOrbEntity
+    private static int roundToOrbSize(int value) {
+        if (value >= 2477) return 2477;
+        if (value >= 1237) return 1237;
+        if (value >= 617) return 617;
+        if (value >= 307) return 307;
+        if (value >= 149) return 149;
+        if (value >= 73) return 73;
+        if (value >= 37) return 37;
+        if (value >= 17) return 17;
+        if (value >= 7) return 7;
+        return value >= 3 ? 3 : 1;
     }
 
     private static long performCleanup(MinecraftServer server) {

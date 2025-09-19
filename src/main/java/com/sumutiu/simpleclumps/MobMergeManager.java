@@ -1,30 +1,17 @@
 package com.sumutiu.simpleclumps;
 
 import net.minecraft.entity.Entity;
-import com.sumutiu.simpleclumps.MergedMob;
 import net.minecraft.entity.EntityType;
-import net.minecraft.server.world.ServerWorld;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.Box;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Box;
 
-
-import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.util.math.BlockPos;
+import java.util.Set;
 
-/**
- * MobMergeManager: clumps hostile mobs and animals.
- */
 public class MobMergeManager {
 
     private static final int CLUMP_RADIUS = 5;
@@ -94,5 +81,4 @@ public class MobMergeManager {
             source.setCustomNameVisible(true);
         }
     }
-
 }

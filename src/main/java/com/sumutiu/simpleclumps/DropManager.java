@@ -114,7 +114,6 @@ public class DropManager {
                 pos.x + radius, pos.y + radius, pos.z + radius);
 
         List<ItemEntity> list = world.getEntitiesByClass(ItemEntity.class, box, ItemEntity::isAlive);
-        if (list.size() <= 1) return;
 
         List<Group> groups = new ArrayList<>();
 
@@ -138,7 +137,7 @@ public class DropManager {
         }
 
         for (Group g : groups) {
-            if (g.members.size() <= 1) {
+            if (g.members.size() <= 1 && g.totalCount <= 1) {
                 continue;
             }
             int total = g.totalCount;
@@ -154,7 +153,6 @@ public class DropManager {
             // respawn minimal stacks
             Item prototype = g.prototype.getItem();
             int max = prototype.getMaxCount();
-            boolean firstStack = true;
 
             while (total > 0) {
                 int size = Math.min(total, max);
@@ -168,12 +166,12 @@ public class DropManager {
                 ItemEntity created = new ItemEntity(world, spawnPos.x, spawnPos.y, spawnPos.z, newStack);
                 created.setToDefaultPickupDelay();
 
-                if (firstStack) {
+                if (size > 1) {
                     String itemName = newStack.getName().getString();
-                    Text label = Text.literal(g.totalCount + " of " + itemName);
+                    Text label = Text.literal("x" + size).formatted(Formatting.GREEN)
+                                    .append(Text.literal(" " + itemName).formatted(Formatting.WHITE));
                     created.setCustomName(label);
                     created.setCustomNameVisible(true);
-                    firstStack = false;
                 }
 
                 world.spawnEntity(created);

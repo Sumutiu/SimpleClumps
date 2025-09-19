@@ -9,6 +9,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
@@ -34,6 +37,23 @@ public class DropManager {
     }
 
     public static void onEntityLoad(Entity entity, ServerWorld world) {
+        if (entity instanceof ItemEntity) {
+            ItemStack stack = ((ItemEntity) entity).getStack();
+            if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+                NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+                if (customData.contains("simpleclumps:processed")) {
+                    NbtCompound nbt = customData.copyNbt();
+                    nbt.remove("simpleclumps:processed");
+                    if (nbt.isEmpty()) {
+                        stack.remove(DataComponentTypes.CUSTOM_DATA);
+                    } else {
+                        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+                    }
+                    return;
+                }
+            }
+        }
+
         if (entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity) {
             pending.add(new QueuedEntity(entity, world));
         }
@@ -118,6 +138,9 @@ public class DropManager {
         }
 
         for (Group g : groups) {
+            if (g.members.size() <= 1) {
+                continue;
+            }
             int total = g.totalCount;
             if (total <= 0) continue;
 
@@ -131,11 +154,28 @@ public class DropManager {
             // respawn minimal stacks
             Item prototype = g.prototype.getItem();
             int max = prototype.getMaxCount();
+            boolean firstStack = true;
+
             while (total > 0) {
                 int size = Math.min(total, max);
                 ItemStack newStack = g.prototype.copyWithCount(size);
+
+                NbtComponent customData = newStack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+                NbtCompound nbt = customData.copyNbt();
+                nbt.putBoolean("simpleclumps:processed", true);
+                newStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+
                 ItemEntity created = new ItemEntity(world, spawnPos.x, spawnPos.y, spawnPos.z, newStack);
                 created.setToDefaultPickupDelay();
+
+                if (firstStack) {
+                    String itemName = newStack.getName().getString();
+                    Text label = Text.literal(g.totalCount + " of " + itemName);
+                    created.setCustomName(label);
+                    created.setCustomNameVisible(true);
+                    firstStack = false;
+                }
+
                 world.spawnEntity(created);
                 total -= size;
             }

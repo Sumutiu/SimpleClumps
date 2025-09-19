@@ -53,7 +53,7 @@ public class MobMergeManager {
         }
 
         MergedMob sourceMob = (MergedMob) source;
-        if (sourceMob.getStackCount() > 1 || source.hasCustomName()) {
+        if (sourceMob.simpleclumps_getStackCount() > 1 || source.hasCustomName()) {
             return;
         }
 
@@ -64,16 +64,16 @@ public class MobMergeManager {
 
         if (list.isEmpty()) return;
 
-        int currentStack = sourceMob.getStackCount();
+        int currentStack = sourceMob.simpleclumps_getStackCount();
 
         for (LivingEntity nearbyEntity : list) {
             MergedMob nearbyMob = (MergedMob) nearbyEntity;
-            currentStack += nearbyMob.getStackCount();
+            currentStack += nearbyMob.simpleclumps_getStackCount();
             nearbyEntity.discard();
         }
 
         if (currentStack > 1) {
-            sourceMob.setStackCount(currentStack);
+            sourceMob.simpleclumps_setStackCount(currentStack);
             String mobName = source.getType().getName().getString();
             Text label = Text.literal("x" + currentStack).formatted(Formatting.GREEN)
                     .append(Text.literal(" " + mobName).formatted(Formatting.WHITE));

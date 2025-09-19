@@ -1,6 +1,6 @@
 package com.sumutiu.simpleclumps;
 
 public interface MergedMob {
-    int getStackCount();
-    void setStackCount(int count);
+    int simpleclumps_getStackCount();
+    void simpleclumps_setStackCount(int count);
 }

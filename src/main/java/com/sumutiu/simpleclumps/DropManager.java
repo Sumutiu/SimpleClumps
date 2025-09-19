@@ -15,6 +15,8 @@ import net.minecraft.util.math.Vec3d;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.sumutiu.simpleclumps.MessagesHelper.*;
+
 /**
  * DropManager: clumps XP and stackable items, and periodically clears stray drops.
  */
@@ -59,7 +61,7 @@ public class DropManager {
                     mergeNearbyOrbs((ExperienceOrbEntity) q.entity, q.world);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger(2, String.format(ERROR_MERGING, ex));
             }
             processed++;
         }
@@ -67,30 +69,23 @@ public class DropManager {
         ticksUntilClean--;
 
         if (!countdownAnnounced30s && ticksUntilClean <= 30 * 20 && ticksUntilClean > 5 * 20) {
-            broadcast(server, "Cleaning stray drops in 30 seconds!");
+            ServerBroadcast(server, CLEANING_DROPS);
             countdownAnnounced30s = true;
         }
 
         if (ticksUntilClean <= 5 * 20 && ticksUntilClean > 0) {
             if (ticksUntilClean % 20 == 0) {
                 int sec = ticksUntilClean / 20;
-                broadcast(server, "Cleaning stray drops in " + sec + "...");
+                ServerBroadcast(server, String.format(CLEANING_DROPS_SCHEDULE, sec));
             }
         }
 
         if (ticksUntilClean <= 0) {
             long removed = performCleanup(server);
-            broadcast(server, "Cleaned stray drops. Removed " + removed + " entities.");
+            ServerBroadcast(server, String.format(CLEANING_DROPS_CONFIRM, removed));
             ticksUntilClean = cleanIntervalTicks;
             countdownAnnounced30s = false;
         }
-    }
-
-    private static void broadcast(MinecraftServer server, String msg) {
-        Text full = Text.literal("[SimpleClumps] ")
-                .formatted(Formatting.GREEN)
-                .append(Text.literal(msg).formatted(Formatting.WHITE));
-        server.getPlayerManager().broadcast(full, false);
     }
 
     private static void mergeNearbyItems(ItemEntity source, ServerWorld world) {

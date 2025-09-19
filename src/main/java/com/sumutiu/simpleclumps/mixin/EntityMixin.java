@@ -2,6 +2,8 @@ package com.sumutiu.simpleclumps.mixin;
 
 import com.sumutiu.simpleclumps.MergedMob;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.world.World;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -21,8 +23,8 @@ public abstract class EntityMixin implements MergedMob {
 
     private static final TrackedData<Integer> STACK_COUNT = DataTracker.registerData(Entity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    @Inject(method = "initDataTracker", at = @At("HEAD"))
-    private void initDataTracker(CallbackInfo ci) {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onInit(EntityType<?> type, World world, CallbackInfo ci) {
         this.dataTracker.set(STACK_COUNT, 1);
     }
 

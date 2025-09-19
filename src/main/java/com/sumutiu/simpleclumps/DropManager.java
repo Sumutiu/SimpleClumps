@@ -87,7 +87,7 @@ public class DropManager {
     }
 
     private static void broadcast(MinecraftServer server, String msg) {
-        Text full = Text.literal("[SimpleProtect] ")
+        Text full = Text.literal("[SimpleClumps] ")
                 .formatted(Formatting.GREEN)
                 .append(Text.literal(msg).formatted(Formatting.WHITE));
         server.getPlayerManager().broadcast(full, false);

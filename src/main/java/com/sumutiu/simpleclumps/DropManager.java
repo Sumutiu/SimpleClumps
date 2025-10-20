@@ -91,7 +91,7 @@ public class DropManager {
     private static void mergeNearbyItems(ItemEntity source, ServerWorld world) {
         if (source == null || !source.isAlive()) return;
 
-        Vec3d pos = source.getPos();
+        Vec3d pos = new Vec3d(source.getX(), source.getY(), source.getZ());
         Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
                 pos.x + radius, pos.y + radius, pos.z + radius);
 
@@ -132,7 +132,8 @@ public class DropManager {
             if (total <= 0) continue;
 
             processedThisTick.addAll(g.members);
-            Vec3d spawnPos = g.members.getFirst().getPos();
+            ItemEntity first = g.members.getFirst();
+            Vec3d spawnPos = new Vec3d(first.getX(), first.getY(), first.getZ());
 
             // remove old entities
             for (ItemEntity e : g.members) {
@@ -168,7 +169,7 @@ public class DropManager {
     private static void mergeNearbyOrbs(ExperienceOrbEntity source, ServerWorld world) {
         if (source == null || !source.isAlive()) return;
 
-        Vec3d pos = source.getPos();
+        Vec3d pos = new Vec3d(source.getX(), source.getY(), source.getZ());
         Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
                 pos.x + radius, pos.y + radius, pos.z + radius);
 
@@ -176,7 +177,7 @@ public class DropManager {
         if (list.size() <= 1) return;
 
         int totalXp = 0;
-        Vec3d spawnPos = source.getPos();
+        Vec3d spawnPos = new Vec3d(source.getX(), source.getY(), source.getZ());
         Vec3d originalVelocity = source.getVelocity();
 
         for (ExperienceOrbEntity orb : list) {

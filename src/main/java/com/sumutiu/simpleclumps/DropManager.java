@@ -1,16 +1,15 @@
 package com.sumutiu.simpleclumps;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,6 +20,7 @@ import static com.sumutiu.simpleclumps.MessagesHelper.*;
  * DropManager: clumps XP and stackable items, and periodically clears stray drops.
  */
 public class DropManager {
+
     private static int radius = 5;
     private static int cleanIntervalTicks = 5 * 60 * 20;
 
@@ -36,33 +36,34 @@ public class DropManager {
         ticksUntilClean = cleanIntervalTicks;
     }
 
-    public static void onEntityLoad(Entity entity, ServerWorld world) {
-        if (entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity) {
+    public static void onEntityLoad(Entity entity, ServerLevel world) {
+        if (entity instanceof ItemEntity || entity instanceof ExperienceOrb) {
             pending.add(new QueuedEntity(entity, world));
         }
     }
 
     public static void handleServerTick(MinecraftServer server) {
         processedThisTick.clear();
+
         int processed = 0;
         int maxPerTick = 200;
+
         while (processed < maxPerTick) {
             QueuedEntity q = pending.poll();
             if (q == null) break;
 
-            if (processedThisTick.contains(q.entity)) {
-                continue;
-            }
+            if (processedThisTick.contains(q.entity)) continue;
 
             try {
-                if (q.entity instanceof ItemEntity) {
-                    mergeNearbyItems((ItemEntity) q.entity, q.world);
-                } else if (q.entity instanceof ExperienceOrbEntity) {
-                    mergeNearbyOrbs((ExperienceOrbEntity) q.entity, q.world);
+                if (q.entity instanceof ItemEntity item) {
+                    mergeNearbyItems(item, q.world);
+                } else if (q.entity instanceof ExperienceOrb orb) {
+                    mergeNearbyOrbs(orb, q.world);
                 }
             } catch (Exception ex) {
                 Logger(2, String.format(ERROR_MERGING, ex));
             }
+
             processed++;
         }
 
@@ -83,39 +84,43 @@ public class DropManager {
         if (ticksUntilClean <= 0) {
             long removed = performCleanup(server);
             ServerBroadcast(server, String.format(CLEANING_DROPS_CONFIRM, removed));
+
             ticksUntilClean = cleanIntervalTicks;
             countdownAnnounced30s = false;
         }
     }
 
-    private static void mergeNearbyItems(ItemEntity source, ServerWorld world) {
+    private static void mergeNearbyItems(ItemEntity source, ServerLevel world) {
         if (source == null || !source.isAlive()) return;
 
-        Vec3d pos = new Vec3d(source.getX(), source.getY(), source.getZ());
-        Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
-                pos.x + radius, pos.y + radius, pos.z + radius);
+        Vec3 pos = source.position();
+        AABB box = new AABB(
+                pos.x - radius, pos.y - radius, pos.z - radius,
+                pos.x + radius, pos.y + radius, pos.z + radius
+        );
 
-        List<ItemEntity> list = world.getEntitiesByClass(ItemEntity.class, box, ItemEntity::isAlive);
+        List<ItemEntity> list = world.getEntitiesOfClass(ItemEntity.class, box, ItemEntity::isAlive);
         if (list.isEmpty()) return;
 
         List<Group> groups = new ArrayList<>();
 
         for (ItemEntity ie : list) {
-            if (processedThisTick.contains(ie)) {
-                continue;
-            }
-            ItemStack st = ie.getStack();
+            if (processedThisTick.contains(ie)) continue;
+
+            ItemStack st = ie.getItem();
             if (st.isEmpty()) continue;
 
             boolean added = false;
+
             for (Group g : groups) {
-                if (ItemStack.areItemsAndComponentsEqual(g.prototype, st)) {
+                if (ItemStack.isSameItemSameComponents(g.prototype, st)) {
                     g.totalCount += st.getCount();
                     g.members.add(ie);
                     added = true;
                     break;
                 }
             }
+
             if (!added) {
                 Group g = new Group(st.copy(), st.getCount());
                 g.members.add(ie);
@@ -124,77 +129,81 @@ public class DropManager {
         }
 
         for (Group g : groups) {
-            if (g.members.isEmpty()) {
-                continue;
-            }
+            if (g.members.isEmpty()) continue;
 
             int total = g.totalCount;
             if (total <= 0) continue;
 
             processedThisTick.addAll(g.members);
+
             ItemEntity first = g.members.getFirst();
-            Vec3d spawnPos = new Vec3d(first.getX(), first.getY(), first.getZ());
+            Vec3 spawnPos = first.position();
 
             // remove old entities
             for (ItemEntity e : g.members) {
                 if (e != null && e.isAlive()) e.discard();
             }
 
-            // respawn minimal stacks
-            Item prototype = g.prototype.getItem();
-            int max = prototype.getMaxCount();
-            Vec3d originalVelocity = source.getVelocity();
+            int max = g.prototype.getMaxStackSize();
+            Vec3 velocity = source.getDeltaMovement();
 
             while (total > 0) {
                 int size = Math.min(total, max);
                 ItemStack newStack = g.prototype.copyWithCount(size);
 
                 ItemEntity created = new ItemEntity(world, spawnPos.x, spawnPos.y, spawnPos.z, newStack);
-                created.setToDefaultPickupDelay();
-                created.setVelocity(originalVelocity);
+                created.setDefaultPickUpDelay();
+                created.setDeltaMovement(velocity);
+
                 processedThisTick.add(created);
 
-                String itemName = newStack.getName().getString();
-                Text label = Text.literal("x" + size).formatted(Formatting.GREEN)
-                                .append(Text.literal(" " + itemName).formatted(Formatting.WHITE));
+                Component label = Component.literal("x" + size)
+                        .withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(" " + newStack.getHoverName().getString())
+                                .withStyle(ChatFormatting.WHITE));
+
                 created.setCustomName(label);
                 created.setCustomNameVisible(true);
 
-                world.spawnEntity(created);
+                world.addFreshEntity(created);
+
                 total -= size;
             }
         }
     }
 
-    private static void mergeNearbyOrbs(ExperienceOrbEntity source, ServerWorld world) {
+    private static void mergeNearbyOrbs(ExperienceOrb source, ServerLevel world) {
         if (source == null || !source.isAlive()) return;
 
-        Vec3d pos = new Vec3d(source.getX(), source.getY(), source.getZ());
-        Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
-                pos.x + radius, pos.y + radius, pos.z + radius);
+        Vec3 pos = source.position();
+        AABB box = new AABB(
+                pos.x - radius, pos.y - radius, pos.z - radius,
+                pos.x + radius, pos.y + radius, pos.z + radius
+        );
 
-        List<ExperienceOrbEntity> list = world.getEntitiesByClass(ExperienceOrbEntity.class, box, ExperienceOrbEntity::isAlive);
+        List<ExperienceOrb> list = world.getEntitiesOfClass(ExperienceOrb.class, box, ExperienceOrb::isAlive);
         if (list.size() <= 1) return;
 
         int totalXp = 0;
-        Vec3d spawnPos = new Vec3d(source.getX(), source.getY(), source.getZ());
-        Vec3d originalVelocity = source.getVelocity();
+        Vec3 spawnPos = source.position();
+        Vec3 velocity = source.getDeltaMovement();
 
-        for (ExperienceOrbEntity orb : list) {
-            totalXp += orb.getValue(); // Mojang mapping
+        for (ExperienceOrb orb : list) {
+            totalXp += orb.getValue();
             orb.discard();
         }
 
         while (totalXp > 0) {
-            int orbSize = roundToOrbSize(totalXp);
-            totalXp -= orbSize;
-            ExperienceOrbEntity newOrb = new ExperienceOrbEntity(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), orbSize);
-            newOrb.setVelocity(originalVelocity);
-            world.spawnEntity(newOrb);
+            int size = roundToOrbSize(totalXp);
+            totalXp -= size;
+
+            ExperienceOrb orb = new ExperienceOrb(world, spawnPos.x, spawnPos.y, spawnPos.z, size);
+            orb.setDeltaMovement(velocity);
+
+            world.addFreshEntity(orb);
         }
     }
 
-    // this is a replica of the private method in ExperienceOrbEntity
     private static int roundToOrbSize(int value) {
         if (value >= 2477) return 2477;
         if (value >= 1237) return 1237;
@@ -211,18 +220,15 @@ public class DropManager {
     private static long performCleanup(MinecraftServer server) {
         long removed = 0;
 
-        for (ServerWorld world : server.getWorlds()) {
-            // Box covering the whole world (arbitrary large box)
-            Box worldBox = new Box(-30000000, -64, -30000000, 30000000, 320, 30000000);
+        for (ServerLevel world : server.getAllLevels()) {
+            AABB worldBox = new AABB(-30000000, -64, -30000000, 30000000, 320, 30000000);
 
-            // Clean ItemEntities
-            for (ItemEntity e : world.getEntitiesByClass(ItemEntity.class, worldBox, entity -> true)) {
+            for (ItemEntity e : world.getEntitiesOfClass(ItemEntity.class, worldBox, _ -> true)) {
                 e.discard();
                 removed++;
             }
 
-            // Clean ExperienceOrbEntities
-            for (ExperienceOrbEntity orb : world.getEntitiesByClass(ExperienceOrbEntity.class, worldBox, entity -> true)) {
+            for (ExperienceOrb orb : world.getEntitiesOfClass(ExperienceOrb.class, worldBox, _ -> true)) {
                 orb.discard();
                 removed++;
             }
@@ -242,9 +248,5 @@ public class DropManager {
         }
     }
 
-    private static class QueuedEntity {
-        final Entity entity;
-        final ServerWorld world;
-        QueuedEntity(Entity e, ServerWorld w) { this.entity = e; this.world = w; }
-    }
+    private record QueuedEntity(Entity entity, ServerLevel world) {}
 }

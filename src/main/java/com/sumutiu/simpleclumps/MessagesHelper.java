@@ -2,9 +2,9 @@ package com.sumutiu.simpleclumps;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +40,10 @@ public class MessagesHelper {
     // Server messaging
     // ----------------------------
     public static void ServerBroadcast(MinecraftServer server, String msg) {
-        Text full = Text.literal(Mod_ID + ": ")
-                .formatted(Formatting.GREEN)
-                .append(Text.literal(msg).formatted(Formatting.WHITE));
-        server.getPlayerManager().broadcast(full, false);
+        Component full = Component.literal(Mod_ID + ": ")
+                .withStyle(style -> style.withColor(ChatFormatting.GREEN))
+                .append(Component.literal(msg).withStyle(style -> style.withColor(ChatFormatting.WHITE)));
+        server.getPlayerList().broadcastSystemMessage(full, false);
     }
 
     // ----------------------------

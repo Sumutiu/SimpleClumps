@@ -3,12 +3,13 @@ package com.sumutiu.simpleclumps;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 import static com.sumutiu.simpleclumps.MessagesHelper.*;
 
 public class SimpleClumps implements ModInitializer {
+
 	// radius (blocks) for clumping in each axis
 	public static final int CLUMP_RADIUS = 5;
 
@@ -18,12 +19,12 @@ public class SimpleClumps implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		DropManager.init(CLUMP_RADIUS, CLEAN_INTERVAL_TICKS);
+
 		logAsciiBanner(MOD_ASCII_BANNER, Mod_ID + ": V" + getModVersion() + " - Because your server deserves smooth performance!");
 
-		// when entities are loaded into a ServerWorld: check item/xp drops
-		ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerWorld world) -> {
-			if (world == null) return;
-			if (!world.isClient()) {
+		// when entities are loaded into a ServerLevel: check item/xp drops
+		ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerLevel world) -> {
+			if (!world.isClientSide()) {
 				DropManager.onEntityLoad(entity, world);
 			}
 		});

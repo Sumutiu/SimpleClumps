@@ -12,15 +12,23 @@ Perfect for survival servers, SMPs, and performance-focused hosts.
 
 ### 📦 Smart Drop Clumping
 - 🟦 XP orbs automatically merge into a single orb  
-- 📦 Dropped items in a **5×5×5 radius** merge into full stacks  
+- 📦 Dropped items in a **configurable radius** (default: **5×5×5**) merge into full stacks  
 - 🔢 Items display as `x30 Spruce Wood` (example) instead of 30 separate drops  
 - ⚡ Significantly reduces entity count for better server performance  
 
-### 🌲 Tree Cutting
+### 🌲 Tree Cutting Helper
 - 🪓 Break one log with an axe to fell the entire tree  
 - 🌿 Automatically detects real trees (prevents accidental structure breaking)  
 - ⚡ Fast and efficient — no need to manually chop every block  
 - 🎮 Designed to feel natural and balanced with vanilla gameplay  
+- 🔧 Can be enabled or disabled via config  
+
+### ⚙️ Configurable
+SimpleClumps now includes a config file so you can tweak behavior to fit your server:
+
+- 📏 **Clumping Radius** — control how far items merge  
+- ⏱️ **Cleanup Interval** — adjust how often entities are processed  
+- 🌲 **Tree Cutting Toggle** — enable or disable the tree helper feature  
 
 ---
 
@@ -35,9 +43,9 @@ Perfect for survival servers, SMPs, and performance-focused hosts.
 
 Because **your server deserves smooth performance!**  
 
-SimpleClumps reduces lag from excessive entities **and** removes tedious actions like chopping trees block-by-block — all without changing core gameplay mechanics.  
+SimpleClumps reduces lag from excessive entities **and** removes tedious actions like chopping trees block-by-block — all while giving you full control through configuration.  
 
-Fewer entities. Less grind. Happier players.
+Fewer entities. Less grind. More control. Happier players.
 
 ---
 

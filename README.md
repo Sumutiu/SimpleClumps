@@ -16,7 +16,7 @@ Perfect for survival servers, SMPs, and performance-focused hosts.
 - 🔢 Items display as `x30 Spruce Wood` (example) instead of 30 separate drops  
 - ⚡ Significantly reduces entity count for better server performance  
 
-### 🌲 Tree Cutting (New!)
+### 🌲 Tree Cutting
 - 🪓 Break one log with an axe to fell the entire tree  
 - 🌿 Automatically detects real trees (prevents accidental structure breaking)  
 - ⚡ Fast and efficient — no need to manually chop every block  

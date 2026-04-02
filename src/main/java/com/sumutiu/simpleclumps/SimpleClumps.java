@@ -3,6 +3,7 @@ package com.sumutiu.simpleclumps;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
@@ -31,5 +32,12 @@ public class SimpleClumps implements ModInitializer {
 
 		// server tick: used for scheduled cleanup + countdown messages
 		ServerTickEvents.END_SERVER_TICK.register(DropManager::handleServerTick);
+
+
+		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, _) -> {
+			if (!world.isClientSide()) {
+				LogsCutter.init((ServerLevel) world, player, pos, state);
+			}
+		});
 	}
 }

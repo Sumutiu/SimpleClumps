@@ -7,37 +7,63 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static com.sumutiu.simpleclumps.MessagesHelper.*;
 
 public class SimpleClumps implements ModInitializer {
 
-	// radius (blocks) for clumping in each axis
-	public static final int CLUMP_RADIUS = 5;
-
-	// cleanup interval: 5 minutes (ticks)
-	public static final int CLEAN_INTERVAL_TICKS = 5 * 60 * 20;
+	public static final Path CONFIG_FOLDER = Path.of("config", "SimpleClumps");
+	public static final Path CONFIG_FILE = CONFIG_FOLDER.resolve("SimpleClumps.json");
 
 	@Override
 	public void onInitialize() {
-		DropManager.init(CLUMP_RADIUS, CLEAN_INTERVAL_TICKS);
+		if (initPlugin()) {
+			DropManager.init(SimpleClumpsConfig.getClumpRadius(), SimpleClumpsConfig.getCleanupMinutes() * 60 * 20);
 
+			// when entities are loaded into a ServerLevel: check item/xp drops
+			ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerLevel world) -> {
+				if (!world.isClientSide()) {
+					DropManager.onEntityLoad(entity, world);
+				}
+			});
+
+			// server tick: used for scheduled cleanup + countdown messages
+			ServerTickEvents.END_SERVER_TICK.register(DropManager::handleServerTick);
+
+
+			if (SimpleClumpsConfig.getEnableTreeCutter()) {
+				PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, _) -> {
+					if (!world.isClientSide()) {
+						LogsCutter.init((ServerLevel) world, player, pos, state);
+					}
+				});
+			}
+		} else {
+			Logger(2, MOD_INIT_FAILED);
+		}
+	}
+
+	private static boolean initPlugin() {
 		logAsciiBanner(MOD_ASCII_BANNER, Mod_ID + ": V" + getModVersion() + " - Because your server deserves smooth performance!");
 
-		// when entities are loaded into a ServerLevel: check item/xp drops
-		ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerLevel world) -> {
-			if (!world.isClientSide()) {
-				DropManager.onEntityLoad(entity, world);
+		try {
+			if (Files.notExists(CONFIG_FOLDER)) {
+				Files.createDirectories(CONFIG_FOLDER);
+				Logger(0, MAIN_FOLDER_CREATED);
 			}
-		});
+		} catch (IOException e) {
+			Logger(2, MAIN_FOLDER_CREATION_FAILED);
+			return false;
+		}
 
-		// server tick: used for scheduled cleanup + countdown messages
-		ServerTickEvents.END_SERVER_TICK.register(DropManager::handleServerTick);
-
-
-		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, _) -> {
-			if (!world.isClientSide()) {
-				LogsCutter.init((ServerLevel) world, player, pos, state);
+		if (Files.notExists(CONFIG_FILE)) {
+			if (!SimpleClumpsConfig.save()) {
+				return false;
 			}
-		});
+		}
+		return SimpleClumpsConfig.load();
 	}
 }

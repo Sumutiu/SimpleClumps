@@ -33,6 +33,14 @@ public class MessagesHelper {
     public static final String CLEANING_DROPS_SCHEDULE = "Cleaning stray drops in %d seconds...";
     public static final String CLEANING_DROPS_CONFIRM = "Cleaned stray drops. Removed %d entities.";
     public static final String ERROR_MERGING = "Error in merging the nearby entities / orbs. Error: %s.";
+    public static final String MAIN_FOLDER_CREATED = "Main Config folder has been created.";
+    public static final String MAIN_FOLDER_CREATION_FAILED = "Failed to create the main Config folder.";
+    public static final String DEFAULT_CONFIG_LOADED = "Default Config created. Please edit the default values in the Config folder.";
+    public static final String CONFIG_SAVE_FAILED = "Failed to save SimpleClumps config: %s";
+    public static final String CONFIG_LOADED = "Successfully loaded configuration.";
+    public static final String CONFIG_LOAD_FAILED = "Failed to load SimpleClumps config: %s";
+    public static final String CONFIG_LOAD_FAILED_MALFORMED = "Failed to load configuration due to malformed JSON. Loading default settings.";
+    public static final String MOD_INIT_FAILED = "Mod has failed to initialize. Error in creating the mod Config folder.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Mod_ID);
 
@@ -51,9 +59,9 @@ public class MessagesHelper {
     // ----------------------------
     public static void Logger(int type, String message) {
         switch (type) {
-            case 0 -> LOGGER.info(message);
-            case 1 -> LOGGER.warn(message);
-            case 2 -> LOGGER.error(message);
+            case 0 -> LOGGER.info(Mod_ID + ": {}", message);
+            case 1 -> LOGGER.warn(Mod_ID + ": {}", message);
+            case 2 -> LOGGER.error(Mod_ID + ": {}", message);
         }
     }
 

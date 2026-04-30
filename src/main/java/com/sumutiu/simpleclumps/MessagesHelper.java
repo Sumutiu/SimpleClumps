@@ -30,6 +30,7 @@ public class MessagesHelper {
     // SimpleClumps - General
     // ----------------------------
     public static final String CLEANING_DROPS = "Cleaning stray drops in 30 seconds!";
+    public static final String MOD_NOT_INITIALIZED = "SimpleClumps mod is not initialized. Try again later.";
     public static final String CLEANING_DROPS_SCHEDULE = "Cleaning stray drops in %d seconds...";
     public static final String CLEANING_DROPS_CONFIRM = "Cleaned stray drops. Removed %d entities.";
     public static final String ERROR_MERGING = "Error in merging the nearby entities / orbs. Error: %s.";

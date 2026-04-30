@@ -17,24 +17,26 @@ import java.util.Set;
 
 public class LogsCutter {
     public static void init(ServerLevel world, Player player, BlockPos pos, BlockState state) {
-        if (world.isClientSide())
-            return;
-        if (player.isShiftKeyDown())
-            return;
-        ItemStack tool = player.getMainHandItem();
-        if (!tool.is(ItemTags.AXES))
-            return;
-        if (!state.is(BlockTags.LOGS))
-            return;
-        Set<BlockPos> logs = Collect_Logs(world, pos);
-        if (!Is_Tree(logs, world))
-            return;
-        for (BlockPos log : logs) {
-            BlockState logState = world.getBlockState(log);
-            logState.getBlock().playerDestroy(world, player, log, logState, null, tool);
-            world.removeBlock(log, false);
-            if (tool.isDamageableItem())
-                tool.hurtAndBreak(1, player, player.getUsedItemHand());
+        if (SimpleClumpsConfig.getEnableTreeCutter()) {
+            if (world.isClientSide())
+                return;
+            if (player.isShiftKeyDown())
+                return;
+            ItemStack tool = player.getMainHandItem();
+            if (!tool.is(ItemTags.AXES))
+                return;
+            if (!state.is(BlockTags.LOGS))
+                return;
+            Set<BlockPos> logs = Collect_Logs(world, pos);
+            if (!Is_Tree(logs, world))
+                return;
+            for (BlockPos log : logs) {
+                BlockState logState = world.getBlockState(log);
+                logState.getBlock().playerDestroy(world, player, log, logState, null, tool);
+                world.removeBlock(log, false);
+                if (tool.isDamageableItem())
+                    tool.hurtAndBreak(1, player, player.getUsedItemHand());
+            }
         }
     }
 

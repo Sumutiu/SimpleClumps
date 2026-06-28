@@ -18,6 +18,7 @@ public class SimpleClumpsConfig {
         public Boolean SimpleClumps_EnableTreeCutter = true;
     }
 
+    private static final ConfigData config_Default = new ConfigData();
     private static ConfigData config = new ConfigData();
 
     public static boolean save() {
@@ -39,9 +40,9 @@ public class SimpleClumpsConfig {
                 config = loaded;
 
                 // Check for missing fields (null means they weren't present)
-                if (config.SimpleClumps_CleanupMinutes == null) { config.SimpleClumps_CleanupMinutes = 5; updated = true; }
-                if (config.SimpleClumps_ClumpRadius == null) { config.SimpleClumps_ClumpRadius = 5; updated = true; }
-                if (config.SimpleClumps_EnableTreeCutter == null) { config.SimpleClumps_EnableTreeCutter = true; updated = true; }
+                if (config.SimpleClumps_CleanupMinutes == null) { config.SimpleClumps_CleanupMinutes = config_Default.SimpleClumps_CleanupMinutes; updated = true; }
+                if (config.SimpleClumps_ClumpRadius == null) { config.SimpleClumps_ClumpRadius = config_Default.SimpleClumps_ClumpRadius; updated = true; }
+                if (config.SimpleClumps_EnableTreeCutter == null) { config.SimpleClumps_EnableTreeCutter = config_Default.SimpleClumps_EnableTreeCutter; updated = true; }
                 Logger(0, CONFIG_LOADED);
             } else {
                 Logger(1, CONFIG_LOAD_FAILED_MALFORMED);

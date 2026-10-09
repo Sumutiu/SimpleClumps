@@ -19,85 +19,92 @@ import static com.sumutiu.simpleclumps.MessagesHelper.*;
 
 public class SimpleClumps implements ModInitializer {
 
-	public static Path CONFIG_FOLDER;
-	public static Path CONFIG_FILE;
+    public static Path CONFIG_FOLDER;
+    public static Path CONFIG_FILE;
 
-	public static volatile boolean SimpleClumpsInitialized = false;
+    public static volatile boolean SimpleClumpsInitialized = false;
 
-	@Override
-	public void onInitialize() {
+    @Override
+    public void onInitialize() {
 
-		// -----------------------------
-		// SERVER START (WORLD EXISTS)
-		// -----------------------------
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+        // -----------------------------
+        // SERVER START (WORLD EXISTS)
+        // -----------------------------
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 
-			long seed = server.getWorldGenSettings().options().seed();
+            long seed = server.getWorldGenSettings().options().seed();
 
-			CONFIG_FOLDER = Path.of("config", "SimpleClumps_Seed_" + Long.toUnsignedString(seed));
-			CONFIG_FILE = CONFIG_FOLDER.resolve("SimpleClumps.json");
+            CONFIG_FOLDER = Path.of("config", "SimpleClumps_Seed_" + Long.toUnsignedString(seed));
+            CONFIG_FILE = CONFIG_FOLDER.resolve("SimpleClumps.json");
 
-			if (initPlugin()) {
-				DropManager.init(SimpleClumpsConfig.getClumpRadius(), SimpleClumpsConfig.getCleanupMinutes() * 60 * 20);
+            if (initPlugin()) {
+                DropManager.init(SimpleClumpsConfig.getClumpRadius(), SimpleClumpsConfig.getCleanupMinutes());
+                if (SimpleClumpsConfig.getCleanupMinutes() == 0) {
+                    Logger(0, CLEANUP_DISABLED);
+                }
 
-				SimpleClumpsInitialized = true;
-			} else {
-				Logger(2, MOD_INIT_FAILED);
-			}
-		});
+                SimpleClumpsInitialized = true;
+            } else {
+                Logger(2, MOD_INIT_FAILED);
+            }
+        });
 
-		// when entities are loaded into a ServerLevel: check item/xp drops
-		ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerLevel world) -> {
-			if (!world.isClientSide() && SimpleClumpsInitialized) {
-				DropManager.onEntityLoad(entity, world);
-			}
-		});
+        // When entities are added to a world (new drops, and drops in chunks that load): queue item and XP drops
+        ServerEntityEvents.ENTITY_LOAD.register((Entity entity, ServerLevel world) -> {
+            if (SimpleClumpsInitialized) {
+                DropManager.onEntityLoad(entity, world);
+            }
+        });
 
-		// server tick: used for scheduled cleanup + countdown messages
-		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (!SimpleClumpsInitialized) return;
-			DropManager.handleServerTick(server);
-		});
+        // Server tick: merging, scheduled cleanup and countdown messages
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            if (SimpleClumpsInitialized) {
+                DropManager.handleServerTick(server);
+            }
+        });
 
-		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, _) -> {
-			if (!world.isClientSide() && SimpleClumpsInitialized) {
-				LogsCutter.init((ServerLevel) world, player, pos, state);
-			}
-		});
+        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, _) -> {
+            if (SimpleClumpsInitialized && world instanceof ServerLevel level && player instanceof ServerPlayer serverPlayer) {
+                LogsCutter.init(level, serverPlayer, pos, state);
+            }
+        });
 
-		ServerPlayConnectionEvents.JOIN.register((handler, _, _) -> {
-			ServerPlayer player = handler.getPlayer();
+        ServerPlayConnectionEvents.JOIN.register((handler, _, _) -> {
+            ServerPlayer player = handler.getPlayer();
 
-			if (!SimpleClumpsInitialized) {
-				player.connection.disconnect(
-						Component.literal(MOD_NOT_INITIALIZED)
-				);
-			}
-		});
+            if (!SimpleClumpsInitialized) {
+                player.connection.disconnect(
+                        Component.literal(MOD_NOT_INITIALIZED)
+                );
+            }
+        });
 
-		ServerLifecycleEvents.SERVER_STOPPED.register(_ ->
-			SimpleClumpsInitialized = false
-		);
-	}
+        ServerLifecycleEvents.SERVER_STOPPED.register(_ -> {
+            SimpleClumpsInitialized = false;
+            DropManager.clear();
+        });
+    }
 
-	private static boolean initPlugin() {
-		logAsciiBanner(MOD_ASCII_BANNER, Mod_ID + ": V" + getModVersion() + " - Because your server deserves smooth performance!");
+    private static boolean initPlugin() {
+        logAsciiBanner(MOD_ASCII_BANNER, Mod_ID + ": V" + getModVersion() + " - Because your server deserves smooth performance!");
 
-		try {
-			if (Files.notExists(CONFIG_FOLDER)) {
-				Files.createDirectories(CONFIG_FOLDER);
-				Logger(0, MAIN_FOLDER_CREATED);
-			}
-		} catch (IOException e) {
-			Logger(2, MAIN_FOLDER_CREATION_FAILED);
-			return false;
-		}
+        try {
+            if (Files.notExists(CONFIG_FOLDER)) {
+                Files.createDirectories(CONFIG_FOLDER);
+                Logger(0, MAIN_FOLDER_CREATED);
+            }
+        } catch (IOException e) {
+            Logger(2, MAIN_FOLDER_CREATION_FAILED);
+            return false;
+        }
 
-		if (Files.notExists(CONFIG_FILE)) {
-			if (!SimpleClumpsConfig.save()) {
-				return false;
-			}
-		}
-		return SimpleClumpsConfig.load();
-	}
+        if (Files.notExists(CONFIG_FILE)) {
+            if (!SimpleClumpsConfig.createDefault()) {
+                return false;
+            }
+            Logger(0, DEFAULT_CONFIG_LOADED);
+        }
+        SimpleClumpsConfig.load();
+        return true;
+    }
 }

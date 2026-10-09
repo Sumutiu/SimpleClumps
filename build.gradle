@@ -3,7 +3,7 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+version = "${project.mod_version}+${project.minecraft_version}"
 group = project.maven_group
 
 base {
@@ -11,11 +11,10 @@ base {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+	maven {
+		url = "https://maven.nucleoid.xyz/"
+		name = "Nucleoid"
+	}
 }
 
 dependencies {
@@ -30,10 +29,12 @@ dependencies {
 }
 
 processResources {
-	inputs.property "version", project.version
+	// Read the value now; the configuration cache can't use 'inputs' or 'project' inside the closure later
+	def modVersion = project.version.toString()
+	inputs.property "version", modVersion
 
 	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
+		expand "version": modVersion
 	}
 }
 
@@ -52,9 +53,10 @@ java {
 }
 
 jar {
-	inputs.property "archivesName", project.base.archivesName
+	def archivesName = project.property("archives_base_name").toString()
+	inputs.property "archivesName", archivesName
 
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}"}
+	from("LICENSE.txt") {
+		rename { "LICENSE_${archivesName}.txt" }
 	}
 }

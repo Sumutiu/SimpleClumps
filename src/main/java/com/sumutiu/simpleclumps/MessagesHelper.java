@@ -41,6 +41,9 @@ public class MessagesHelper {
     public static final String CONFIG_LOADED = "Successfully loaded configuration.";
     public static final String CONFIG_LOAD_FAILED = "Failed to load SimpleClumps config: %s";
     public static final String CONFIG_LOAD_FAILED_MALFORMED = "Failed to load configuration due to malformed JSON. Loading default settings.";
+    public static final String CONFIG_SAVED = "Saved configuration file: %s";
+    public static final String CONFIG_INVALID_VALUE = "Config value %s = %d is not valid, using %d instead.";
+    public static final String CLEANUP_DISABLED = "The scheduled drop cleanup is turned off (SimpleClumps_CleanupMinutes is 0).";
     public static final String MOD_INIT_FAILED = "Mod has failed to initialize. Error in creating the mod Config folder.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Mod_ID);

@@ -11,24 +11,36 @@ Perfect for survival servers, SMPs, and performance-focused hosts.
 ## ✨ Features
 
 ### 📦 Smart Drop Clumping
-- 🟦 XP orbs automatically merge into a single orb  
-- 📦 Dropped items in a **configurable radius** (default: **5×5×5**) merge into full stacks  
-- 🔢 Items display as `x30 Spruce Wood` (example) instead of 30 separate drops  
+- 🟦 Nearby XP orbs automatically merge into as few orbs as possible, without losing any XP  
+- 📦 Dropped items within a **configurable radius** (default: **5 blocks** in every direction) merge into full stacks  
+- 🔢 Items display as `x30 Spruce Wood` (example) instead of 30 separate drops, and the label updates when part of a stack is picked up  
+- 🧭 Follows vanilla's merging rules: items only one player may pick up stay theirs, fresh drops wait until they can be picked up, and merged stacks keep the newer despawn timer  
 - ⚡ Significantly reduces entity count for better server performance  
+
+### 🧹 Scheduled Cleanup
+- 🗑️ Every few minutes (default: **5**), all dropped items and XP orbs in loaded chunks are removed  
+- 📢 Players get a warning 30 seconds before, and a countdown for the last 5 seconds  
+- 🔧 The interval can be changed, or the cleanup turned off, in the config  
 
 ### 🌲 Tree Cutting Helper
 - 🪓 Break one log with an axe to fell the entire tree  
-- 🌿 Automatically detects real trees (prevents accidental structure breaking)  
+- 🧍 Sneak while breaking to cut a single log  
+- 🌿 Automatically detects real trees: only natural leaves count, not leaves placed by players (prevents accidental structure breaking)  
+- 🛡 Uses up axe durability, gives no drops in creative, and respects spawn protection and protection mods  
 - ⚡ Fast and efficient — no need to manually chop every block  
 - 🎮 Designed to feel natural and balanced with vanilla gameplay  
 - 🔧 Can be enabled or disabled via config  
 
 ### ⚙️ Configurable
-SimpleClumps now includes a config file so you can tweak behavior to fit your server:
+SimpleClumps now includes a config file so you can tweak behavior to fit your server.  
+It is created on the first start at:  
+`/config/SimpleClumps_Seed_<world seed>/SimpleClumps.json`
 
-- 📏 **Clumping Radius** — control how far items merge  
-- ⏱️ **Cleanup Interval** — adjust how often entities are processed  
-- 🌲 **Tree Cutting Toggle** — enable or disable the tree helper feature  
+- 📏 **Clumping Radius** (`SimpleClumps_ClumpRadius`, default `5`) — how far (in blocks) items and XP merge  
+- ⏱️ **Cleanup Interval** (`SimpleClumps_CleanupMinutes`, default `5`) — minutes between cleanups of all dropped items and XP orbs (`0` turns the cleanup off)  
+- 🌲 **Tree Cutting Toggle** (`SimpleClumps_EnableTreeCutter`, default `true`) — enable or disable the tree helper feature  
+
+Changes take effect after a server restart.
 
 ---
 

@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.sumutiu.simpleclumps.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ExperienceOrbAccessor",
+		"ItemEntityAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

@@ -1,7 +1,5 @@
 package com.sumutiu.simpleclumps;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -72,14 +70,6 @@ public class MessagesHelper {
     // ----------------------------
     // Helper Methods
     // ----------------------------
-    public static String getModVersion() {
-        return FabricLoader.getInstance()
-                .getModContainer("simpleclumps")
-                .map(ModContainer::getMetadata)
-                .map(meta -> meta.getVersion().getFriendlyString())
-                .orElse("unknown");
-    }
-
     public static void logAsciiBanner(String banner, String footer) {
         LOGGER.info(""); // Empty line before
         for (String line : banner.stripTrailing().split("\n")) {

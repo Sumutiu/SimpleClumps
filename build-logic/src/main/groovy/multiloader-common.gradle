@@ -1,0 +1,47 @@
+// Setup shared by common, fabric and neoforge
+plugins {
+    id 'java-library'
+}
+
+version = "${mod_version}+${minecraft_version}"
+group = maven_group
+
+base {
+    // simpleclumps-fabric-<version>.jar, simpleclumps-neoforge-<version>.jar
+    archivesName = "${mod_id}-${project.name}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar).configureEach {
+    def modId = mod_id
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${modId}" }
+    }
+}
+
+processResources {
+    // Placeholders like ${version} in fabric.mod.json and neoforge.mods.toml
+    def expandProps = [
+            'version'                      : project.version.toString(),
+            'java_version'                 : java_version,
+            'minecraft_version'            : minecraft_version,
+            'minecraft_version_range'      : minecraft_version_range,
+            'loader_version'               : loader_version,
+            'neoforge_version'             : neoforge_version,
+            'neoforge_loader_version_range': neoforge_loader_version_range
+    ]
+    inputs.properties(expandProps)
+
+    filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+}

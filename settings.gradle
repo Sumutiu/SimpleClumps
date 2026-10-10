@@ -1,10 +1,27 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
+
+plugins {
+    // Downloads Java 25 for the build if it isn't installed
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'SimpleClumps'
+
+// Shared build setup for the subprojects (multiloader-common / multiloader-loader)
+includeBuild('build-logic')
+
+// common:   the mod itself, plain Minecraft code with no mod loader
+// fabric:   the Fabric entrypoint, builds the Fabric jar
+// neoforge: the NeoForge entrypoint, builds the NeoForge jar
+include('common')
+include('fabric')
+include('neoforge')

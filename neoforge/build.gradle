@@ -1,0 +1,52 @@
+//file:noinspection GroovyAssignabilityCheck
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    // To change the version see the gradle.properties file
+    version = neoforge_version
+
+    runs {
+        client {
+            client()
+            ideName = 'NeoForge Client'
+        }
+        server {
+            server()
+            ideName = 'NeoForge Server'
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// IntelliJ starts the NeoForge runs with launch files that the prepare tasks write to build/moddev.
+// Running the prepare task before each launch keeps the runs working after a clean or rebuild.
+neoForge.runs.configureEach { run ->
+    run.taskBefore(tasks.named("prepare${run.name.capitalize()}Run"))
+}
+
+// Marks this project as "neoforge" so Loom and ModDevGradle pick the right variants
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements', 'sourcesElements'].each { variant ->
+    configurations.named(variant) {
+        attributes {
+            attribute(loaderAttribute, 'neoforge')
+        }
+    }
+}
+sourceSets.configureEach {
+    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName, it.getTaskName(null, 'jarJar')].each { variant ->
+        configurations.named(variant) {
+            attributes {
+                attribute(loaderAttribute, 'neoforge')
+            }
+        }
+    }
+}

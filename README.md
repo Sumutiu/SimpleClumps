@@ -1,6 +1,6 @@
 # 🟦 SimpleClumps – Lag-free drops, smoother servers!
 
-**SimpleClumps** is a lightweight, fully server-side **Fabric** mod that improves performance and gameplay by merging drops **and** streamlining tree cutting.  
+**SimpleClumps** is a lightweight, fully server-side mod for **Fabric** and **NeoForge** that improves performance and gameplay by merging drops **and** streamlining tree cutting.  
 
 By reducing entity clutter and simplifying repetitive actions, it keeps your world running smoothly while staying true to vanilla feel.  
 
@@ -46,8 +46,29 @@ Changes take effect after a server restart.
 
 ## 🧩 Requirements
 
+**Fabric**
 - [Fabric Loader](https://fabricmc.net/use/)  
 - [Fabric API](https://modrinth.com/mod/fabric-api)  
+
+**NeoForge**
+- [NeoForge](https://neoforged.net/) (nothing else needed)  
+
+---
+
+## 🛠️ Building
+
+The project builds both loaders from one shared codebase:
+
+- `common/` – the mod itself (clumping, cleanup, tree cutting, config), plain Minecraft code  
+- `fabric/` – the Fabric entrypoint and `fabric.mod.json`  
+- `neoforge/` – the NeoForge entrypoint and `neoforge.mods.toml`  
+
+Run `gradlew build` (Java 25). The jars are created in:
+
+- `fabric/build/libs/simpleclumps-fabric-<version>.jar`  
+- `neoforge/build/libs/simpleclumps-neoforge-<version>.jar`  
+
+Versions (Minecraft, Fabric, NeoForge) are all set in `gradle.properties`.
 
 ---
 

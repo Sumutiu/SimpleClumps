@@ -1,0 +1,4 @@
+plugins {
+    // Turns the .gradle files in src/main/groovy into plugins the subprojects can apply
+    id 'groovy-gradle-plugin'
+}
